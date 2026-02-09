@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WeatherBug - Modern Weather Platform 2026</title>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --sky-50: #f0f9ff; --sky-100: #e0f2fe; --sky-200: #bae6fd;
+  --sky-300: #7dd3fc; --sky-400: #38bdf8; --sky-500: #0ea5e9;
+  --sky-600: #0284c7; --sky-700: #0369a1;
+  
+  --slate-50: #f8fafc; --slate-100: #f1f5f9; --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1; --slate-400: #94a3b8; --slate-500: #64748b;
+  --slate-600: #475569; --slate-700: #334155; --slate-800: #1e293b;
+  --slate-900: #0f172a;
+  
+  --amber-400: #fbbf24; --amber-500: #f59e0b;
+  --red-500: #ef4444; --orange-500: #f97316; --green-500: #22c55e;
+  
+  --bg-primary: var(--slate-50); --bg-secondary: #ffffff;
+  --bg-tertiary: var(--slate-100); --text-primary: var(--slate-900);
+  --text-secondary: var(--slate-600); --text-tertiary: var(--slate-400);
+  --border-color: var(--slate-200); --accent: var(--sky-500);
+  --accent-hover: var(--sky-600);
+  
+  --spacing-xs: 0.25rem; --spacing-sm: 0.5rem; --spacing-md: 1rem;
+  --spacing-lg: 1.5rem; --spacing-xl: 2rem; --spacing-2xl: 3rem;
+  
+  --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 24px;
+  
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.06), 0 2px 4px -1px rgba(0,0,0,0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
+}
+
+[data-theme="dark"] {
+  --bg-primary: var(--slate-900); --bg-secondary: var(--slate-800);
+  --bg-tertiary: var(--slate-700); --text-primary: var(--slate-50);
+  --text-secondary: var(--slate-300); --text-tertiary: var(--slate-500);
+  --border-color: var(--slate-700);
+}
+
+body {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-primary); color: var(--text-primary);
+  line-height: 1.6; transition: background 0.3s ease, color 0.3s ease;
+}
+
+#root { min-height: 100vh; }
+
+.heading-xl { font-size: clamp(2rem, 5vw, 4rem); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; }
+.heading-lg { font-size: clamp(1.5rem, 3vw, 2.5rem); font-weight: 600; line-height: 1.2; letter-spacing: -0.01em; }
+.heading-md { font-size: 1.5rem; font-weight: 600; line-height: 1.3; }
+.heading-sm { font-size: 1.125rem; font-weight: 600; line-height: 1.4; }
+.body-lg { font-size: 1.125rem; line-height: 1.6; }
+.body-md { font-size: 1rem; line-height: 1.6; }
+.body-sm { font-size: 0.875rem; line-height: 1.5; }
+.mono { font-family: 'Space Mono', monospace; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+
+.fade-in { animation: fadeIn 0.4s ease-out; }
+.slide-in { animation: slideIn 0.3s ease-out; }
+
+.card {
+  background: var(--bg-secondary); border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg); padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm); transition: all 0.2s ease;
+}
+.card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+
+.glass {
+  background: rgba(255,255,255,0.7); backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.3);
+}
+[data-theme="dark"] .glass {
+  background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.1);
+}
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: var(--radius-md);
+  font-weight: 500; font-size: 0.9375rem; cursor: pointer; border: none;
+  transition: all 0.2s ease; text-decoration: none;
+}
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); }
+.btn-secondary:hover { background: var(--border-color); }
+.btn-ghost { background: transparent; color: var(--text-secondary); }
+.btn-ghost:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+
+.container { max-width: 1400px; margin: 0 auto; padding: 0 var(--spacing-lg); }
+.grid { display: grid; gap: var(--spacing-lg); }
+.grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.grid-3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+
+input, select, textarea {
+  width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border-color);
+  border-radius: var(--radius-md); background: var(--bg-secondary);
+  color: var(--text-primary); font-family: inherit; font-size: 0.9375rem;
+  transition: all 0.2s ease;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+label {
+  display: block; margin-bottom: 0.5rem; font-weight: 500;
+  font-size: 0.875rem; color: var(--text-secondary);
+}
+
+.badge {
+  display: inline-flex; align-items: center; padding: 0.25rem 0.75rem;
+  border-radius: 999px; font-size: 0.75rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.025em;
+}
+.badge-info { background: var(--sky-100); color: var(--sky-700); }
+.badge-warning { background: #fef3c7; color: #92400e; }
+.badge-danger { background: #fee2e2; color: #991b1b; }
+.badge-success { background: #d1fae5; color: #065f46; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, createContext, useContext } = React;
+
+const AppContext = createContext();
+
+const AppProvider = ({ children }) => {
+  const [theme, setTheme] = useState('light');
+  const [user, setUser] = useState(null);
+  const [location, setLocation] = useState({ name: 'San Francisco, CA', lat: 37.7749, lon: -122.4194 });
+  const [currentPage, setCurrentPage] = useState('home');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [weatherData, setWeatherData] = useState(null);
+  const [alerts, setAlerts] = useState([]);
+  const [savedLocations, setSavedLocations] = useState([
+    { name: 'San Francisco, CA', lat: 37.7749, lon: -122.4194 },
+    { name: 'New York, NY', lat: 40.7128, lon: -74.0060 },
+  ]);
+  const [dashboardCards, setDashboardCards] = useState([
+    { id: 'hero', title: 'Current Weather', visible: true },
+    { id: 'hourly', title: 'Hourly Forecast', visible: true },
+    { id: 'aqi', title: 'Air Quality', visible: true },
+    { id: 'wind', title: 'Wind & Humidity', visible: true },
+    { id: 'alerts', title: 'Weather Alerts', visible: true },
+  ]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
+    const mockData = {
+      current: {
+        temp: 72, condition: 'Partly Cloudy', icon: '⛅', feelsLike: 70,
+        humidity: 65, windSpeed: 12, windDirection: 'NW', pressure: 30.1,
+        visibility: 10, uvIndex: 6, dewPoint: 58,
+      },
+      hourly: Array.from({ length: 24 }, (_, i) => ({
+        time: `${(i + 8) % 24}:00`,
+        temp: 72 + Math.sin(i / 4) * 8,
+        condition: i % 3 === 0 ? 'Sunny' : i % 3 === 1 ? 'Cloudy' : 'Partly Cloudy',
+        icon: i % 3 === 0 ? '☀️' : i % 3 === 1 ? '☁️' : '⛅',
+        precipitation: Math.random() > 0.7 ? Math.floor(Math.random() * 30) : 0,
+      })),
+      daily: Array.from({ length: 10 }, (_, i) => ({
+        day: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun', 'Mon', 'Tue', 'Wed'][i],
+        high: 75 + Math.random() * 10,
+        low: 58 + Math.random() * 8,
+        condition: ['Sunny', 'Partly Cloudy', 'Cloudy', 'Rainy'][Math.floor(Math.random() * 4)],
+        icon: ['☀️', '⛅', '☁️', '🌧️'][Math.floor(Math.random() * 4)],
+        precipitation: Math.floor(Math.random() * 40),
+      })),
+      aqi: {
+        value: 42, category: 'Good', color: '#22c55e',
+        description: 'Air quality is satisfactory',
+      },
+    };
+    setWeatherData(mockData);
+
+    setAlerts([{
+      id: 1, type: 'Heat Advisory', severity: 'warning',
+      title: 'Excessive Heat Warning',
+      description: 'Dangerously hot conditions with temperatures up to 105°F expected.',
+      validUntil: 'Tonight at 8:00 PM', icon: '🌡️',
+    }]);
+  }, [location]);
+
+  const value = {
+    theme, setTheme, user, setUser, location, setLocation, currentPage, setCurrentPage,
+    sidebarOpen, setSidebarOpen, weatherData, alerts, savedLocations, setSavedLocations,
+    dashboardCards, setDashboardCards,
+  };
+
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+};
+
+const useApp = () => useContext(AppContext);
+
+
+// Header Component
+const Header = () => {
+  const { theme, setTheme, user, setCurrentPage, setSidebarOpen, location } = useApp();
+  return (
+    <header style={{
+      background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)',
+      position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(12px)',
+    }}>
+      <div className="container" style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        height: '72px', gap: 'var(--spacing-lg)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-lg)' }}>
+          <button className="btn btn-ghost" onClick={() => setSidebarOpen(prev => !prev)} 
+                  style={{ padding: '0.5rem' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="3" y1="12" x2="21" y2="12"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+          <button onClick={() => setCurrentPage('home')} style={{
+            display: 'flex', alignItems: 'center', gap: '0.75rem',
+            background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-primary)',
+          }}>
+            <div style={{ fontSize: '2rem', lineHeight: 1 }}>🐞</div>
+            <div>
+              <div className="heading-sm" style={{ margin: 0 }}>WeatherBug</div>
+              <div className="body-sm" style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>
+                {location.name}
+              </div>
+            </div>
+          </button>
+        </div>
+        
+        <div style={{ flex: '1', maxWidth: '500px', position: 'relative', 
+                     display: window.innerWidth < 768 ? 'none' : 'block' }}>
+          <input type="search" placeholder="Search locations..." style={{ paddingLeft: '2.5rem' }}/>
+          <svg style={{
+            position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)',
+            color: 'var(--text-tertiary)',
+          }} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.35-4.35"/>
+          </svg>
+        </div>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
+          <button className="btn btn-ghost" onClick={() => setCurrentPage('alerts')}
+                  style={{ padding: '0.5rem', position: 'relative' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <span style={{
+              position: 'absolute', top: '4px', right: '4px', width: '8px', height: '8px',
+              background: 'var(--orange-500)', borderRadius: '50%',
+            }}/>
+          </button>
+          
+          <button className="btn btn-ghost" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+                  style={{ padding: '0.5rem' }}>
+            {theme === 'light' ? (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+              </svg>
+            ) : (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="5"/>
+                <line x1="12" y1="1" x2="12" y2="3"/>
+                <line x1="12" y1="21" x2="12" y2="23"/>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                <line x1="1" y1="12" x2="3" y2="12"/>
+                <line x1="21" y1="12" x2="23" y2="12"/>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+              </svg>
+            )}
+          </button>
+          
+          {user ? (
+            <button className="btn btn-ghost" onClick={() => setCurrentPage('profile')}
+                    style={{ padding: '0.5rem', borderRadius: '50%', width: '40px', height: '40px' }}>
+              <div style={{
+                width: '24px', height: '24px', borderRadius: '50%',
+                background: 'linear-gradient(135deg, var(--sky-400), var(--sky-600))',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: 'white', fontSize: '0.75rem', fontWeight: '600',
+              }}>
+                {user.name.charAt(0)}
+              </div>
+            </button>
+          ) : (
+            <button className="btn btn-primary" onClick={() => setCurrentPage('signin')}>
+              Sign In
+            </button>
+          )}
+        </div>
+      </div>
+    </header>
+  );
+};
+
+// Sidebar Component
+const Sidebar = () => {
+  const { sidebarOpen, setSidebarOpen, setCurrentPage, user } = useApp();
+  
+  const menuItems = [
+    { id: 'home', label: 'Home', icon: '🏠' },
+    { id: 'forecast', label: 'Forecast', icon: '📅' },
+    { id: 'maps', label: 'Maps', icon: '🗺️' },
+    { id: 'lightning', label: 'Lightning', icon: '⚡' },
+    { id: 'alerts', label: 'Alerts', icon: '⚠️' },
+    { divider: true },
+    { id: 'signin', label: user ? 'Profile' : 'Sign In', icon: '👤' },
+    { id: 'settings', label: 'Settings', icon: '⚙️' },
+    { id: 'alert-settings', label: 'Alert Settings', icon: '🔔' },
+    { id: 'card-order', label: 'Card Order', icon: '📋' },
+    { divider: true },
+    { id: 'remove-ads', label: 'Remove Ads', icon: '✨', badge: 'PRO' },
+    { id: 'faq', label: 'FAQ', icon: '❓' },
+    { id: 'feedback', label: 'Send Feedback', icon: '💬' },
+    { id: 'share', label: 'Share', icon: '📤' },
+    { divider: true },
+    { id: 'about', label: 'About & Privacy', icon: 'ℹ️' },
+    { id: 'terms', label: 'Terms of Service', icon: '📄' },
+    { id: 'privacy', label: 'Privacy Policy', icon: '🔒' },
+    { id: 'adchoices', label: 'AdChoices', icon: '🎯' },
+  ];
+  
+  const handleNavigation = (id) => {
+    if (id === 'signin' && user) {
+      setCurrentPage('profile');
+    } else {
+      setCurrentPage(id);
+    }
+    setSidebarOpen(false);
+  };
+  
+  if (!sidebarOpen) return null;
+  
+  return (
+    <>
+      <div style={{
+        position: 'fixed', inset: 0, background: 'rgba(0, 0, 0, 0.4)',
+        zIndex: 998, animation: 'fadeIn 0.2s ease',
+      }} onClick={() => setSidebarOpen(false)}/>
+      <aside className="slide-in" style={{
+        position: 'fixed', left: 0, top: 0, bottom: 0, width: '280px',
+        background: 'var(--bg-secondary)', borderRight: '1px solid var(--border-color)',
+        zIndex: 999, overflowY: 'auto', padding: 'var(--spacing-lg)',
+      }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          marginBottom: 'var(--spacing-xl)',
+        }}>
+          <div className="heading-sm">Menu</div>
+          <button className="btn btn-ghost" onClick={() => setSidebarOpen(false)}
+                  style={{ padding: '0.5rem' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+          {menuItems.map((item, index) => (
+            item.divider ? (
+              <div key={`divider-${index}`} style={{
+                height: '1px', background: 'var(--border-color)',
+                margin: 'var(--spacing-md) 0',
+              }}/>
+            ) : (
+              <button key={item.id} className="btn btn-ghost" onClick={() => handleNavigation(item.id)}
+                      style={{
+                        width: '100%', justifyContent: 'flex-start',
+                        padding: '0.75rem 1rem', fontSize: '0.9375rem',
+                      }}>
+                <span style={{ fontSize: '1.25rem' }}>{item.icon}</span>
+                <span style={{ flex: 1, textAlign: 'left' }}>{item.label}</span>
+                {item.badge && (
+                  <span className="badge badge-warning" style={{ fontSize: '0.625rem' }}>
+                    {item.badge}
+                  </span>
+                )}
+              </button>
+            )
+          ))}
+        </nav>
+      </aside>
+    </>
+  );
+};
+
+
+// Home Page - Main Dashboard
+const HomePage = () => {
+  const { weatherData, alerts, dashboardCards } = useApp();
+  if (!weatherData) return <div style={{ padding: 'var(--spacing-2xl)', textAlign: 'center' }}>Loading...</div>;
+  
+  const visibleCards = dashboardCards.filter(card => card.visible);
+  
+  return (
+    <div className="fade-in" style={{ padding: 'var(--spacing-xl) 0' }}>
+      <div className="container">
+        {visibleCards.find(c => c.id === 'hero') && (
+          <div className="card glass" style={{
+            marginBottom: 'var(--spacing-xl)', padding: 'var(--spacing-2xl)',
+            background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(56, 189, 248, 0.1))',
+            borderColor: 'rgba(14, 165, 233, 0.2)',
+          }}>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: window.innerWidth < 768 ? '1fr' : '1fr auto',
+              gap: 'var(--spacing-xl)', alignItems: 'center',
+            }}>
+              <div>
+                <div style={{ fontSize: '6rem', lineHeight: 1, marginBottom: 'var(--spacing-md)' }}>
+                  {weatherData.current.icon}
+                </div>
+                <div className="heading-xl" style={{ marginBottom: '0.5rem' }}>
+                  {weatherData.current.temp}°F
+                </div>
+                <div className="heading-md" style={{ color: 'var(--text-secondary)', marginBottom: 'var(--spacing-lg)' }}>
+                  {weatherData.current.condition}
+                </div>
+                <div className="body-md" style={{ color: 'var(--text-secondary)' }}>
+                  Feels like {weatherData.current.feelsLike}° • Humidity {weatherData.current.humidity}%
+                </div>
+              </div>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 'var(--spacing-md)' }}>
+                {[
+                  { label: 'Wind', value: `${weatherData.current.windSpeed} mph ${weatherData.current.windDirection}` },
+                  { label: 'Pressure', value: `${weatherData.current.pressure} in` },
+                  { label: 'Visibility', value: `${weatherData.current.visibility} mi` },
+                  { label: 'UV Index', value: weatherData.current.uvIndex },
+                ].map((item, i) => (
+                  <div key={i} style={{
+                    padding: 'var(--spacing-md)', background: 'var(--bg-secondary)',
+                    borderRadius: 'var(--radius-md)',
+                  }}>
+                    <div className="body-sm" style={{ color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>
+                      {item.label}
+                    </div>
+                    <div className="heading-sm">{item.value}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {visibleCards.find(c => c.id === 'alerts') && alerts.length > 0 && (
+          <div style={{ marginBottom: 'var(--spacing-xl)' }}>
+            {alerts.map(alert => (
+              <div key={alert.id} className="card" style={{
+                background: 'linear-gradient(135deg, #fef3c7, #fde68a)',
+                borderColor: '#f59e0b', marginBottom: 'var(--spacing-md)',
+              }}>
+                <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
+                  <div style={{ fontSize: '2rem' }}>{alert.icon}</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)', marginBottom: '0.5rem' }}>
+                      <span className="badge badge-warning">{alert.severity}</span>
+                      <span className="body-sm" style={{ color: '#78350f' }}>
+                        Valid until {alert.validUntil}
+                      </span>
+                    </div>
+                    <div className="heading-sm" style={{ color: '#78350f', marginBottom: '0.5rem' }}>
+                      {alert.title}
+                    </div>
+                    <div className="body-md" style={{ color: '#92400e' }}>
+                      {alert.description}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        {visibleCards.find(c => c.id === 'hourly') && (
+          <div className="card" style={{ marginBottom: 'var(--spacing-xl)' }}>
+            <div className="heading-md" style={{ marginBottom: 'var(--spacing-lg)' }}>
+              Hourly Forecast
+            </div>
+            <div style={{
+              display: 'flex', gap: 'var(--spacing-md)', overflowX: 'auto',
+              paddingBottom: 'var(--spacing-md)',
+            }}>
+              {weatherData.hourly.slice(0, 12).map((hour, i) => (
+                <div key={i} style={{
+                  minWidth: '80px', textAlign: 'center', padding: 'var(--spacing-md)',
+                  background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)',
+                }}>
+                  <div className="body-sm" style={{ color: 'var(--text-tertiary)', marginBottom: '0.5rem' }}>
+                    {hour.time}
+                  </div>
+                  <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{hour.icon}</div>
+                  <div className="heading-sm">{Math.round(hour.temp)}°</div>
+                  {hour.precipitation > 0 && (
+                    <div className="body-sm" style={{ color: 'var(--sky-600)', marginTop: '0.25rem' }}>
+                      {hour.precipitation}%
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        <div className="grid grid-2">
+          {visibleCards.find(c => c.id === 'aqi') && (
+            <div className="card">
+              <div className="heading-sm" style={{ marginBottom: 'var(--spacing-lg)' }}>
+                Air Quality Index
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-lg)' }}>
+                <div style={{
+                  width: '100px', height: '100px', borderRadius: '50%',
+                  background: weatherData.aqi.color, display: 'flex',
+                  alignItems: 'center', justifyContent: 'center', color: 'white',
+                }}>
+                  <div className="heading-lg">{weatherData.aqi.value}</div>
+                </div>
+                <div>
+                  <div className="heading-sm" style={{ marginBottom: '0.25rem' }}>
+                    {weatherData.aqi.category}
+                  </div>
+                  <div className="body-sm" style={{ color: 'var(--text-secondary)' }}>
+                    {weatherData.aqi.description}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {visibleCards.find(c => c.id === 'wind') && (
+            <div className="card">
+              <div className="heading-sm" style={{ marginBottom: 'var(--spacing-lg)' }}>
+                Wind & Humidity
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 'var(--spacing-lg)' }}>
+                <div>
+                  <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>💨</div>
+                  <div className="heading-md">{weatherData.current.windSpeed} mph</div>
+                  <div className="body-sm" style={{ color: 'var(--text-secondary)' }}>
+                    {weatherData.current.windDirection}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>💧</div>
+                  <div className="heading-md">{weatherData.current.humidity}%</div>
+                  <div className="body-sm" style={{ color: 'var(--text-secondary)' }}>
+                    Dew Point {weatherData.current.dewPoint}°
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+        
+        <div className="card" style={{
+          marginTop: 'var(--spacing-xl)', padding: 'var(--spacing-xl)',
+          background: 'var(--bg-tertiary)', textAlign: 'center', borderStyle: 'dashed',
+        }}>
+          <div className="body-sm" style={{ color: 'var(--text-tertiary)', marginBottom: '0.5rem' }}>
+            SPONSORED
+          </div>
+          <div className="body-md" style={{ color: 'var(--text-secondary)' }}>
+            Advertisement Space
+          </div>
+          <button className="btn btn-primary" style={{ marginTop: 'var(--spacing-md)' }}>
+            Remove Ads with Pro
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Forecast Page
+const ForecastPage = () => {
+  const { weatherData } = useApp();
+  const [view, setView] = useState('daily');
+  if (!weatherData) return null;
+  
+  return (
+    <div className="fade-in" style={{ padding: 'var(--spacing-xl) 0' }}>
+      <div className="container">
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          marginBottom: 'var(--spacing-xl)',
+        }}>
+          <h1 className="heading-lg">Extended Forecast</h1>
+          <div style={{
+            display: 'inline-flex', background: 'var(--bg-tertiary)',
+            padding: '4px', borderRadius: 'var(--radius-md)',
+          }}>
+            <button className={view === 'hourly' ? 'btn btn-primary' : 'btn btn-ghost'}
+                    onClick={() => setView('hourly')} style={{ padding: '0.5rem 1rem' }}>
+              Hourly
+            </button>
+            <button className={view === 'daily' ? 'btn btn-primary' : 'btn btn-ghost'}
+                    onClick={() => setView('daily')} style={{ padding: '0.5rem 1rem' }}>
+              10-Day
+            </button>
+          </div>
+        </div>
+        
+        {view === 'daily' ? (
+          <div className="grid" style={{ gap: 'var(--spacing-md)' }}>
+            {weatherData.daily.map((day, i) => (
+              <div key={i} className="card" style={{
+                display: 'grid', gridTemplateColumns: 'auto 1fr auto auto',
+                gap: 'var(--spacing-lg)', alignItems: 'center',
+              }}>
+                <div className="heading-sm" style={{ minWidth: '60px' }}>{day.day}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)' }}>
+                  <div style={{ fontSize: '2rem' }}>{day.icon}</div>
+                  <div className="body-md">{day.condition}</div>
+                </div>
+                {day.precipitation > 0 && (
+                  <div className="body-sm" style={{ color: 'var(--sky-600)' }}>
+                    💧 {day.precipitation}%
+                  </div>
+                )}
+                <div style={{ display: 'flex', gap: 'var(--spacing-md)', minWidth: '100px' }}>
+                  <div className="heading-sm">{Math.round(day.high)}°</div>
+                  <div className="body-md" style={{ color: 'var(--text-tertiary)' }}>
+                    {Math.round(day.low)}°
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="card">
+            <div style={{ display: 'flex', gap: 'var(--spacing-sm)', overflowX: 'auto' }}>
+              {weatherData.hourly.map((hour, i) => (
+                <div key={i} style={{
+                  minWidth: '100px', padding: 'var(--spacing-lg)', textAlign: 'center',
+                  background: i % 3 === 0 ? 'var(--bg-tertiary)' : 'transparent',
+                  borderRadius: 'var(--radius-md)',
+                }}>
+                  <div className="body-sm" style={{ color: 'var(--text-tertiary)', marginBottom: '0.5rem' }}>
+                    {hour.time}
+                  </div>
+                  <div style={{ fontSize: '2.5rem', margin: 'var(--spacing-md) 0' }}>
+                    {hour.icon}
+                  </div>
+                  <div className="heading-md">{Math.round(hour.temp)}°</div>
+                  {hour.precipitation > 0 && (
+                    <div className="body-sm" style={{ color: 'var(--sky-600)', marginTop: '0.5rem' }}>
+                      💧 {hour.precipitation}%
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
+// Simple page placeholders for the remaining functional pages
+const MapsPage = () => (
+  <div className="fade-in" style={{ padding: 'var(--spacing-xl) 0' }}>
+    <div className="container">
+      <h1 className="heading-lg" style={{ marginBottom: 'var(--spacing-xl)' }}>Interactive Weather Maps</h1>
+      <div className="card" style={{ padding: '3rem', textAlign: 'center', minHeight: '500px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ fontSize: '4rem', marginBottom: 'var(--spacing-lg)' }}>🗺️</div>
+        <div className="heading-md" style={{ marginBottom: 'var(--spacing-md)' }}>Weather Map Layers</div>
+        <div className="body-md" style={{ color: 'var(--text-secondary)', marginBottom: 'var(--spacing-lg)' }}>
+          Interactive maps with temperature, precipitation, wind, and lightning layers
+        </div>
+        <div style={{ display: 'flex', gap: 'var(--spacing-sm)', flexWrap: 'wrap', justifyContent: 'center' }}>
+          {['🌡️ Temperature', '🌧️ Precipitation', '💨 Wind', '⚡ Lightning', '☁️ Clouds'].map(layer => (
+            <button key={layer} className="btn btn-secondary">{layer}</button>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const LightningPage = () => (
+  <div className="fade-in" style={{ padding: 'var(--spacing-xl) 0' }}>
+    <div className="container">
+      <h1 className="heading-lg" style={{ marginBottom: 'var(--spacing-xl)' }}>Lightning Tracker</h1>
+      <div className="grid grid-2">
+        <div className="card" style={{ background: 'linear-gradient(135deg, #fef3c7, #fde68a)', borderColor: '#f59e0b' }}>
+          <div style={{ fontSize: '3rem', marginBottom: 'var(--spacing-md)' }}>⚡</div>
+          <div className="heading-xl" style={{ color: '#78350f', marginBottom: '0.5rem' }}>12</div>
+          <div className="body-lg" style={{ color: '#92400e' }}>Lightning strikes detected</div>
+          <div className="body-sm" style={{ color: '#92400e', marginTop: 'var(--spacing-sm)' }}>Within 10 miles in last 15 minutes</div>
+        </div>
+        <div className="card">
+          <div className="heading-sm" style={{ marginBottom: 'var(--spacing-lg)' }}>Safety Tips</div>
+          <ul style={{ paddingLeft: 'var(--spacing-lg)', color: 'var(--text-secondary)' }}>
+            <li style={{ marginBottom: 'var(--spacing-sm)' }}>Seek shelter in a substantial building</li>
+            <li style={{ marginBottom: 'var(--spacing-sm)' }}>Avoid open fields and isolated trees</li>
+            <li style={{ marginBottom: 'var(--spacing-sm)' }}>Wait 30 minutes after last strike</li>
+            <li>Stay away from windows and doors</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const AlertsPage = () => {
+  const { alerts } = useApp();
+  return (
+    <div className="fade-in" style={{ padding: 'var(--spacing-xl) 0' }}>
+      <div className="container">
+        <h1 className="heading-lg" style={{ marginBottom: 'var(--spacing-xl)' }}>Weather Alerts</h1>
+        {alerts.length > 0 ? (
+          alerts.map(alert => (
+            <div key={alert.id} className="card" style={{
+              background: 'linear-gradient(135deg, #fef3c7, #fde68a)',
+              borderColor: '#f59e0b', marginBottom: 'var(--spacing-md)',
+            }}>
+              <div style={{ display: 'flex', gap: 'var(--spacing-lg)' }}>
+                <div style={{ fontSize: '3rem' }}>{alert.icon}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)', marginBottom: '0.5rem' }}>
+                    <span className="badge badge-warning">{alert.severity}</span>
+                    <span className="body-sm" style={{ color: '#78350f' }}>Valid until {alert.validUntil}</span>
+                  </div>
+                  <div className="heading-md" style={{ color: '#78350f', marginBottom: '0.5rem' }}>{alert.title}</div>
+                  <div className="body-md" style={{ color: '#92400e' }}>{alert.description}</div>
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="card" style={{ textAlign: 'center', padding: 'var(--spacing-2xl)' }}>
+            <div style={{ fontSize: '4rem', marginBottom: 'var(--spacing-md)' }}>✓</div>
+            <div className="heading-md" style={{ marginBottom: '0.5rem' }}>No Active Alerts</div>
+            <div className="body-md" style={{ color: 'var(--text-secondary)' }}>All clear in your area</div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const SignInPage = () => {
+  const { setUser, setCurrentPage } = useApp();
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setUser({ email, name: name || email.split('@')[0] });
+    setCurrentPage('home');
+  };
+  
+  return (
+    <div className="fade-in" style={{ 
+      padding: 'var(--spacing-2xl) 0', minHeight: 'calc(100vh - 72px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <div className="card" style={{ maxWidth: '450px', width: '100%', margin: '0 var(--spacing-lg)' }}>
+        <div style={{ textAlign: 'center', marginBottom: 'var(--spacing-xl)' }}>
+          <div style={{ fontSize: '4rem', marginBottom: 'var(--spacing-md)' }}>🐞</div>
+          <h1 className="heading-lg" style={{ marginBottom: '0.5rem' }}>
+            {isSignUp ? 'Create Account' : 'Welcome Back'}
+          </h1>
+          <p className="body-md" style={{ color: 'var(--text-secondary)' }}>
+            {isSignUp ? 'Sign up for personalized weather' : 'Sign in to your account'}
+          </p>
+        </div>
+        
+        <form onSubmit={handleSubmit}>
+          {isSignUp && (
+            <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+              <label>Name</label>
+              <input type="text" placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)}/>
+            </div>
+          )}
+          
+          <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+            <label>Email</label>
+            <input type="email" placeholder="you@example.com" value={email}
+                   onChange={(e) => setEmail(e.target.value)} required/>
+          </div>
+          
+          <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+            <label>Password</label>
+            <input type="password" placeholder="••••••••" value={password}
+                   onChange={(e) => setPassword(e.target.value)} required/>
+          </div>
+          
+          {!isSignUp && (
+            <div style={{ textAlign: 'right', marginBottom: 'var(--spacing-lg)' }}>
+              <a href="#" className="body-sm" style={{ color: 'var(--accent)', textDecoration: 'none' }}>
+                Forgot password?
+              </a>
+            </div>
+          )}
+          
+          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginBottom: 'var(--spacing-lg)' }}>
+            {isSignUp ? 'Sign Up' : 'Sign In'}
+          </button>
+          
+          <div style={{ textAlign: 'center' }}>
+            <span className="body-sm" style={{ color: 'var(--text-secondary)' }}>
+              {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+            </span>
+            <button type="button" onClick={() => setIsSignUp(!isSignUp)} className="body-sm"
+                    style={{ background: 'none', border: 'none', color: 'var(--accent)',
+                           cursor: 'pointer', textDecoration: 'underline' }}>
+              {isSignUp ? 'Sign In' : 'Sign Up'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+const ProfilePage = () => {
+  const { user, setUser, savedLocations, setCurrentPage } = useApp();
+  
+  if (!user) {
+    return (
+      <div className="fade-in" style={{
+        padding: 'var(--spacing-2xl)', textAlign: 'center',
+        minHeight: 'calc(100vh - 72px)', display: 'flex',
+        alignItems: 'center', justifyContent: 'center',
+      }}>
+        <div>
+          <div style={{ fontSize: '4rem', marginBottom: 'var(--spacing-md)' }}>👤</div>
+          <div className="heading-lg" style={{ marginBottom: 'var(--spacing-md)' }}>Not Signed In</div>
+          <p className="body-md" style={{ color: 'var(--text-secondary)', marginBottom: 'var(--spacing-lg)' }}>
+            Sign in to access your profile and saved locations
+          </p>
+          <button className="btn btn-primary" onClick={() => setCurrentPage('signin')}>Sign In</button>
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="fade-in" style={{ padding: 'var(--spacing-xl) 0' }}>
+      <div className="container" style={{ maxWidth: '900px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-lg)', marginBottom: 'var(--spacing-xl)' }}>
+          <div style={{
+            width: '80px', height: '80px', borderRadius: '50%',
+            background: 'linear-gradient(135deg, var(--sky-400), var(--sky-600))',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'white', fontSize: '2rem', fontWeight: '700',
+          }}>
+            {user.name.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <h1 className="heading-lg" style={{ marginBottom: '0.25rem' }}>{user.name}</h1>
+            <div className="body-md" style={{ color: 'var(--text-secondary)' }}>{user.email}</div>
+          </div>
+        </div>
+        
+        <div className="grid grid-2" style={{ marginBottom: 'var(--spacing-xl)' }}>
+          <div className="card">
+            <div className="heading-sm" style={{ marginBottom: 'var(--spacing-md)' }}>Account Type</div>
+            <div className="body-lg" style={{ marginBottom: 'var(--spacing-md)' }}>Free Plan</div>
+            <button className="btn btn-primary" style={{ width: '100%' }}>Upgrade to Pro</button>
+          </div>
+          <div className="card">
+            <div className="heading-sm" style={{ marginBottom: 'var(--spacing-md)' }}>Member Since</div>
+            <div className="body-lg">January 2026</div>
+          </div>
+        </div>
+        
+        <div className="card" style={{ marginBottom: 'var(--spacing-xl)' }}>
+          <div className="heading-sm" style={{ marginBottom: 'var(--spacing-lg)' }}>Saved Locations</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+            {savedLocations.map((loc, index) => (
+              <div key={index} style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: 'var(--spacing-md)', background: 'var(--bg-tertiary)',
+                borderRadius: 'var(--radius-md)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)' }}>
+                  <div style={{ fontSize: '1.5rem' }}>📍</div>
+                  <div className="body-md">{loc.name}</div>
+                </div>
+              </div>
+            ))}
+            <button className="btn btn-secondary" style={{ width: '100%' }}>+ Add Location</button>
+          </div>
+        </div>
+        
+        <div className="card">
+          <button className="btn btn-secondary" onClick={() => { setUser(null); setCurrentPage('home'); }}
+                  style={{ width: '100%', color: 'var(--red-500)' }}>
+            Sign Out
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Settings and configuration pages
+const SettingsPage = () => {
+  const { theme, setTheme } = useApp();
+  const [units, setUnits] = useState('fahrenheit');
+  const [notifications, setNotifications] = useState(true);
+  
+  return (
+    <div className="fade-in" style={{ padding: 'var(--spacing-xl) 0' }}>
+      <div className="container" style={{ maxWidth: '800px' }}>
+        <h1 className="heading-lg" style={{ marginBottom: 'var(--spacing-xl)' }}>Settings</h1>
+        
+        <div className="card" style={{ marginBottom: 'var(--spacing-lg)' }}>
+          <div className="heading-sm" style={{ marginBottom: 'var(--spacing-lg)' }}>Appearance</div>
+          <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+            <label>Theme</label>
+            <select value={theme} onChange={(e) => setTheme(e.target.value)}>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+              <option value="auto">Auto</option>
+            </select>
+          </div>
+        </div>
+        
+        <div className="card" style={{ marginBottom: 'var(--spacing-lg)' }}>
+          <div className="heading-sm" style={{ marginBottom: 'var(--spacing-lg)' }}>Units</div>
+          <div>
+            <label>Temperature Units</label>
+            <select value={units} onChange={(e) => setUnits(e.target.value)}>
+              <option value="fahrenheit">Fahrenheit (°F)</option>
+              <option value="celsius">Celsius (°C)</option>
+            </select>
+          </div>
+        </div>
+        
+        <div className="card">
+          <div className="heading-sm" style={{ marginBottom: 'var(--spacing-lg)' }}>Privacy & Data</div>
+          <label style={{
+            display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)',
+            cursor: 'pointer', marginBottom: 'var(--spacing-lg)',
+          }}>
+            <input type="checkbox" checked={notifications}
+                   onChange={(e) => setNotifications(e.target.checked)}
+                   style={{ width: 'auto', cursor: 'pointer' }}/>
+            <div>
+              <div className="body-md">Push Notifications</div>
+              <div className="body-sm" style={{ color: 'var(--text-secondary)' }}>
+                Receive alerts for severe weather
+              </div>
+            </div>
+          </label>
+          <button className="btn btn-secondary" style={{ width: '100%' }}>Clear Cache & Data</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AlertSettingsPage = () => (
+  <div className="fade-in" style={{ padding: 'var(--spacing-xl) 0' }}>
+    <div className="container" style={{ maxWidth: '800px' }}>
+      <h1 className="heading-lg" style={{ marginBottom: 'var(--spacing-md)' }}>Alert Settings</h1>
+      <p className="body-md" style={{ color: 'var(--text-secondary)', marginBottom: 'var(--spacing-xl)' }}>
+        Choose which types of weather alerts you want to receive
+      </p>
+      
+      <div className="card">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+          {['Tornado', 'Severe Thunderstorm', 'Flash Flood', 'Winter Storm', 'Heat Advisory', 'Wind Advisory'].map(type => (
+            <label key={type} style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: 'var(--spacing-lg)', background: 'var(--bg-tertiary)',
+              borderRadius: 'var(--radius-md)', cursor: 'pointer',
+            }}>
+              <div className="body-md" style={{ fontWeight: '500' }}>{type}</div>
+              <input type="checkbox" defaultChecked={true} style={{ width: 'auto', cursor: 'pointer' }}/>
+            </label>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const CardOrderPage = () => {
+  const { dashboardCards, setDashboardCards } = useApp();
+  
+  const toggleVisibility = (id) => {
+    setDashboardCards(prev =>
+      prev.map(card => card.id === id ? { ...card, visible: !card.visible } : card)
+    );
+  };
+  
+  return (
+    <div className="fade-in" style={{ padding: 'var(--spacing-xl) 0' }}>
+      <div className="container" style={{ maxWidth: '800px' }}>
+        <h1 className="heading-lg" style={{ marginBottom: 'var(--spacing-md)' }}>Customize Dashboard</h1>
+        <p className="body-md" style={{ color: 'var(--text-secondary)', marginBottom: 'var(--spacing-xl)' }}>
+          Toggle card visibility on your dashboard
+        </p>
+        
+        <div className="card">
+          {dashboardCards.map((card, index) => (
+            <div key={card.id} style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: 'var(--spacing-lg)',
+              marginBottom: index < dashboardCards.length - 1 ? 'var(--spacing-md)' : 0,
+              background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)',
+            }}>
+              <div className="heading-sm">{card.title}</div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)',
+                            cursor: 'pointer', margin: 0 }}>
+                <span className="body-sm" style={{ color: 'var(--text-secondary)' }}>
+                  {card.visible ? 'Visible' : 'Hidden'}
+                </span>
+                <input type="checkbox" checked={card.visible}
+                       onChange={() => toggleVisibility(card.id)}
+                       style={{ width: 'auto', cursor: 'pointer' }}/>
+              </label>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const RemoveAdsPage = () => (
+  <div className="fade-in" style={{ padding: 'var(--spacing-xl) 0' }}>
+    <div className="container" style={{ maxWidth: '900px' }}>
+      <div style={{ textAlign: 'center', marginBottom: 'var(--spacing-2xl)' }}>
+        <div style={{ fontSize: '4rem', marginBottom: 'var(--spacing-md)' }}>✨</div>
+        <h1 className="heading-xl" style={{ marginBottom: 'var(--spacing-md)' }}>WeatherBug Pro</h1>
+        <p className="body-lg" style={{ color: 'var(--text-secondary)' }}>
+          Unlock the full weather experience with no ads
+        </p>
+      </div>
+      
+      <div className="grid grid-2">
+        <div className="card" style={{ padding: 'var(--spacing-xl)', borderColor: 'var(--accent)', borderWidth: '2px' }}>
+          <div className="heading-md" style={{ marginBottom: 'var(--spacing-lg)' }}>Monthly</div>
+          <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+            <div className="heading-xl">$4.99</div>
+            <div className="body-md" style={{ color: 'var(--text-secondary)' }}>per month</div>
+          </div>
+          <button className="btn btn-primary" style={{ width: '100%' }}>Subscribe Monthly</button>
+        </div>
+        
+        <div className="card" style={{
+          padding: 'var(--spacing-xl)',
+          background: 'linear-gradient(135deg, var(--sky-500), var(--sky-600))',
+          color: 'white', borderColor: 'var(--sky-600)',
+        }}>
+          <div style={{
+            display: 'inline-block', padding: '0.25rem 0.75rem',
+            background: 'rgba(255, 255, 255, 0.2)', borderRadius: '999px',
+            fontSize: '0.75rem', fontWeight: '600', marginBottom: 'var(--spacing-md)',
+          }}>BEST VALUE</div>
+          <div className="heading-md" style={{ marginBottom: 'var(--spacing-lg)' }}>Annual</div>
+          <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+            <div className="heading-xl">$49.99</div>
+            <div className="body-md">per year</div>
+            <div className="body-sm" style={{ opacity: 0.8, marginTop: '0.25rem' }}>Save $10 vs monthly</div>
+          </div>
+          <button className="btn" style={{ width: '100%', background: 'white', color: 'var(--sky-600)' }}>
+            Subscribe Annually
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// Simple information pages
+const FAQPage = () => (
+  <div className="fade-in" style={{ padding: 'var(--spacing-xl) 0' }}>
+    <div className="container" style={{ maxWidth: '800px' }}>
+      <h1 className="heading-lg" style={{ marginBottom: 'var(--spacing-xl)' }}>Frequently Asked Questions</h1>
+      <div className="card">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xl)' }}>
+          {[
+            { q: 'How accurate are your forecasts?', a: 'Our forecasts use advanced AI models and data from thousands of weather stations worldwide, providing accuracy rates of 85-90% for 5-day forecasts.' },
+            { q: 'How often is weather data updated?', a: 'Weather data is updated every 15 minutes for current conditions and hourly for forecasts.' },
+            { q: 'What does Pro include?', a: 'WeatherBug Pro removes all ads, provides extended forecasts, priority alerts, and advanced radar features.' },
+          ].map((item, i) => (
+            <div key={i}>
+              <div className="heading-sm" style={{ marginBottom: '0.5rem' }}>{item.q}</div>
+              <div className="body-md" style={{ color: 'var(--text-secondary)' }}>{item.a}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const FeedbackPage = () => {
+  const [submitted, setSubmitted] = useState(false);
+  return (
+    <div className="fade-in" style={{ padding: 'var(--spacing-xl) 0' }}>
+      <div className="container" style={{ maxWidth: '700px' }}>
+        <h1 className="heading-lg" style={{ marginBottom: 'var(--spacing-md)' }}>Send Feedback</h1>
+        <p className="body-md" style={{ color: 'var(--text-secondary)', marginBottom: 'var(--spacing-xl)' }}>
+          We'd love to hear from you! Your feedback helps us improve WeatherBug.
+        </p>
+        
+        {submitted ? (
+          <div className="card" style={{
+            textAlign: 'center', padding: 'var(--spacing-2xl)',
+            background: 'linear-gradient(135deg, #d1fae5, #a7f3d0)',
+            borderColor: '#10b981',
+          }}>
+            <div style={{ fontSize: '4rem', marginBottom: 'var(--spacing-md)' }}>✓</div>
+            <div className="heading-md" style={{ color: '#065f46', marginBottom: '0.5rem' }}>Thank You!</div>
+            <div className="body-md" style={{ color: '#047857' }}>
+              Your feedback has been submitted successfully.
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={(e) => { e.preventDefault(); setSubmitted(true); setTimeout(() => setSubmitted(false), 3000); }}>
+            <div className="card">
+              <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+                <label>Category</label>
+                <select required>
+                  <option value="">Select a category</option>
+                  <option value="bug">Bug Report</option>
+                  <option value="feature">Feature Request</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              
+              <div style={{ marginBottom: 'var(--spacing-xl)' }}>
+                <label>Your Feedback</label>
+                <textarea rows="6" placeholder="Tell us more about your experience..." required/>
+              </div>
+              
+              <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Submit Feedback</button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const SharePage = () => {
+  const [copied, setCopied] = useState(false);
+  return (
+    <div className="fade-in" style={{ padding: 'var(--spacing-xl) 0' }}>
+      <div className="container" style={{ maxWidth: '600px' }}>
+        <h1 className="heading-lg" style={{ marginBottom: 'var(--spacing-xl)', textAlign: 'center' }}>
+          Share WeatherBug
+        </h1>
+        <div className="card" style={{ marginBottom: 'var(--spacing-lg)' }}>
+          <div className="heading-sm" style={{ marginBottom: 'var(--spacing-lg)', textAlign: 'center' }}>
+            Share via Social Media
+          </div>
+          <div style={{
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+            gap: 'var(--spacing-md)',
+          }}>
+            {[
+              { name: 'Twitter', icon: '🐦', color: '#1DA1F2' },
+              { name: 'Facebook', icon: '📘', color: '#4267B2' },
+              { name: 'LinkedIn', icon: '💼', color: '#0077B5' },
+              { name: 'Email', icon: '✉️', color: '#EA4335' },
+            ].map(platform => (
+              <button key={platform.name} className="btn" style={{
+                flexDirection: 'column', padding: 'var(--spacing-lg)',
+                background: platform.color, color: 'white',
+              }}>
+                <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{platform.icon}</div>
+                <div className="body-sm">{platform.name}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AboutPage = () => (
+  <div className="fade-in" style={{ padding: 'var(--spacing-xl) 0' }}>
+    <div className="container" style={{ maxWidth: '800px' }}>
+      <h1 className="heading-lg" style={{ marginBottom: 'var(--spacing-xl)' }}>About WeatherBug</h1>
+      <div className="card" style={{ marginBottom: 'var(--spacing-lg)' }}>
+        <div className="heading-sm" style={{ marginBottom: 'var(--spacing-lg)' }}>Our Mission</div>
+        <p className="body-md" style={{ color: 'var(--text-secondary)', marginBottom: 'var(--spacing-md)' }}>
+          WeatherBug provides accurate, real-time weather information to millions of users worldwide.
+          Our mission is to help you make informed decisions about your day with reliable forecasts and timely alerts.
+        </p>
+        <p className="body-md" style={{ color: 'var(--text-secondary)' }}>
+          Founded in 1995, we operate one of the largest weather networks in the world, with thousands of
+          professional-grade weather stations providing hyperlocal data.
+        </p>
+      </div>
+      <div className="card">
+        <div className="heading-sm" style={{ marginBottom: 'var(--spacing-lg)' }}>Contact Us</div>
+        <div style={{ display: 'grid', gap: 'var(--spacing-md)' }}>
+          <div>
+            <div className="body-sm" style={{ color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Email</div>
+            <div className="body-md">support@weatherbug.com</div>
+          </div>
+          <div>
+            <div className="body-sm" style={{ color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Version</div>
+            <div className="body-md mono">2026.1.0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const TermsPage = () => (
+  <div className="fade-in" style={{ padding: 'var(--spacing-xl) 0' }}>
+    <div className="container" style={{ maxWidth: '800px' }}>
+      <h1 className="heading-lg" style={{ marginBottom: 'var(--spacing-md)' }}>Terms of Service</h1>
+      <p className="body-sm" style={{ color: 'var(--text-tertiary)', marginBottom: 'var(--spacing-xl)' }}>
+        Last updated: February 10, 2026
+      </p>
+      <div className="card">
+        <div className="heading-sm" style={{ marginBottom: 'var(--spacing-md)' }}>1. Acceptance of Terms</div>
+        <p className="body-md" style={{ color: 'var(--text-secondary)', marginBottom: 'var(--spacing-lg)' }}>
+          By accessing or using WeatherBug, you agree to be bound by these Terms of Service and all applicable
+          laws and regulations.
+        </p>
+        
+        <div className="heading-sm" style={{ marginBottom: 'var(--spacing-md)' }}>2. Disclaimer</div>
+        <p className="body-md" style={{ color: 'var(--text-secondary)' }}>
+          The weather information on WeatherBug is provided "as is". WeatherBug makes no warranties, expressed
+          or implied, and hereby disclaims all warranties including fitness for a particular purpose.
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+const PrivacyPage = () => (
+  <div className="fade-in" style={{ padding: 'var(--spacing-xl) 0' }}>
+    <div className="container" style={{ maxWidth: '800px' }}>
+      <h1 className="heading-lg" style={{ marginBottom: 'var(--spacing-md)' }}>Privacy Policy</h1>
+      <p className="body-sm" style={{ color: 'var(--text-tertiary)', marginBottom: 'var(--spacing-xl)' }}>
+        Last updated: February 10, 2026
+      </p>
+      <div className="card">
+        <div className="heading-sm" style={{ marginBottom: 'var(--spacing-md)' }}>Information We Collect</div>
+        <p className="body-md" style={{ color: 'var(--text-secondary)', marginBottom: 'var(--spacing-lg)' }}>
+          We collect information that you provide directly to us, including account information,
+          location data for weather forecasts, and device information.
+        </p>
+        
+        <div className="heading-sm" style={{ marginBottom: 'var(--spacing-md)' }}>How We Use Your Information</div>
+        <p className="body-md" style={{ color: 'var(--text-secondary)' }}>
+          We use the information we collect to provide accurate weather forecasts, send severe weather alerts,
+          and improve our services.
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+const AdChoicesPage = () => (
+  <div className="fade-in" style={{ padding: 'var(--spacing-xl) 0' }}>
+    <div className="container" style={{ maxWidth: '800px' }}>
+      <h1 className="heading-lg" style={{ marginBottom: 'var(--spacing-xl)' }}>Ad Preferences</h1>
+      <div className="card" style={{ marginBottom: 'var(--spacing-lg)' }}>
+        <div className="heading-sm" style={{ marginBottom: 'var(--spacing-md)' }}>About Our Ads</div>
+        <p className="body-md" style={{ color: 'var(--text-secondary)' }}>
+          We show ads to support our free service. You can control how ads are personalized or
+          upgrade to WeatherBug Pro to remove all ads.
+        </p>
+      </div>
+      <div className="card">
+        <div className="heading-sm" style={{ marginBottom: 'var(--spacing-md)' }}>Prefer No Ads?</div>
+        <p className="body-md" style={{ color: 'var(--text-secondary)', marginBottom: 'var(--spacing-lg)' }}>
+          Upgrade to WeatherBug Pro for a completely ad-free experience with premium features.
+        </p>
+        <button className="btn btn-primary">Learn More About Pro</button>
+      </div>
+    </div>
+  </div>
+);
+
+// Main App Component
+const App = () => {
+  const { currentPage } = useApp();
+  
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'home': return <HomePage />;
+      case 'forecast': return <ForecastPage />;
+      case 'maps': return <MapsPage />;
+      case 'lightning': return <LightningPage />;
+      case 'alerts': return <AlertsPage />;
+      case 'signin': return <SignInPage />;
+      case 'profile': return <ProfilePage />;
+      case 'settings': return <SettingsPage />;
+      case 'alert-settings': return <AlertSettingsPage />;
+      case 'remove-ads': return <RemoveAdsPage />;
+      case 'faq': return <FAQPage />;
+      case 'card-order': return <CardOrderPage />;
+      case 'about': return <AboutPage />;
+      case 'terms': return <TermsPage />;
+      case 'privacy': return <PrivacyPage />;
+      case 'adchoices': return <AdChoicesPage />;
+      case 'share': return <SharePage />;
+      case 'feedback': return <FeedbackPage />;
+      default: return <HomePage />;
+    }
+  };
+  
+  return (
+    <>
+      <Header />
+      <Sidebar />
+      <main style={{ minHeight: 'calc(100vh - 72px)' }}>
+        {renderPage()}
+      </main>
+    </>
+  );
+};
+
+// Render the app
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <AppProvider>
+    <App />
+  </AppProvider>
+);
+</script>
+</body>
+</html>
